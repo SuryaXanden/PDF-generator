@@ -2,6 +2,7 @@ import { Component } from '@angular/core';
 
 import * as jsPdf from 'jspdf';
 import { noComponentFactoryError } from '@angular/core/src/linker/component_factory_resolver';
+import { stringify } from '@angular/core/src/render3/util';
 
 @Component({
   selector: 'my-app',
@@ -10,6 +11,33 @@ import { noComponentFactoryError } from '@angular/core/src/linker/component_fact
 })
 export class AppComponent  {
   name = 'Angular';
+  
+  CommaSeparatedNumbers(mon)
+  {
+    let money = mon.split('').reverse().join('');
+    
+    let csv = '';
+    
+    for(let i = 0; i < money.length; i++)
+    {
+      // console.log(money[i])
+        if( i <= 2)
+        {
+          csv += money[i];
+        }
+        
+        else if( i % 2 != 0)
+        {
+          csv += ',' + money[i];
+        }
+        else
+        {
+          csv += money[i];
+        }
+      }
+      // console.log(csv)
+      return csv.split('').reverse().join('');
+    }
 
   pdf()
   {
@@ -37,20 +65,30 @@ export class AppComponent  {
     let y = 77;
     
     //date
-    doc.fromHTML("Date:- DD-MM-YYYY", 24 * 6 - 7 , 56);//16
+    let date = '14-02-2019';
+    let money1 = '123456789';
+    money1 = this.CommaSeparatedNumbers(money1);
+    let money2 = '999999';
+    money2 = this.CommaSeparatedNumbers(money2);
+    let money3 = '9999';
+    money3 = this.CommaSeparatedNumbers(money3);
+    let bankdd = "999999";
+    let dddate = '12-34-5678';
+
+    doc.fromHTML("Date:- " + date, 24 * 6 - 7 , 56);//16
 
     doc.fromHTML("Received with thanks from The Principal, ",x,y);//16
     doc.fromHTML("*54 more characters.................................*", x * 4, y);
     doc.fromHTML("*54 more characters................................>*", x, y + 5);
     doc.fromHTML("*54 more characters................................>*", x * 4 + 2, y + 5);
 
-    doc.fromHTML("the sum of Rupees 123456789 Check/ Bank Draft towards one-time payment of Youth",x,y+10);//16
-    doc.fromHTML("Red Cross College Registration fee 999999 x 9999 30% student membership Fee",x,y+15);//16
-    doc.fromHTML("999999 dt. DD-MM-YYYY bank name & full address",x,y+20);//16
+    doc.fromHTML("the sum of Rupees " + money1 + "/- Check/ Bank Draft towards one-time payment of Youth",x,y+10);//16
+    doc.fromHTML("Red Cross College Registration fee " + money2 + " x " + money3 + " 30% student membership Fee",x,y+15);//16
+    doc.fromHTML( bankdd + " Dated. " + dddate + " bank name & full address",x,y+20);//16
     doc.fromHTML("overflow",x,y+25);//16
     
     //TOTAL
-    doc.fromHTML("<b>Rs.</b> MONEY", x , y + 67 );
+    doc.fromHTML("<b>Rs.</b> " + money1, x , y + 67 );
     doc.fromHTML("Official communications will be followed", x + 100 , y + 62 );
 
     doc.save('out.pdf');
