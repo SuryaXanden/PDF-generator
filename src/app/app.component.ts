@@ -3,6 +3,7 @@ import { Component } from '@angular/core';
 import * as jsPdf from 'jspdf';
 import { noComponentFactoryError } from '@angular/core/src/linker/component_factory_resolver';
 import { stringify } from '@angular/core/src/render3/util';
+import { createUrlResolverWithoutPackagePrefix } from '@angular/compiler';
 
 @Component({
   selector: 'my-app',
@@ -12,32 +13,45 @@ import { stringify } from '@angular/core/src/render3/util';
 export class AppComponent  {
   name = 'Angular';
   
-  CommaSeparatedNumbers(mon)
-  {
-    let money = mon.split('').reverse().join('');
-    
-    let csv = '';
-    
-    for(let i = 0; i < money.length; i++)
-    {
-      // console.log(money[i])
-        if( i <= 2)
-        {
-          csv += money[i];
-        }
-        
-        else if( i % 2 != 0)
-        {
-          csv += ',' + money[i];
-        }
-        else
-        {
-          csv += money[i];
-        }
+  csv(x) {
+      x = x.toString();
+      let lastThree = x.substring(x.length - 3);
+      const otherNumbers = x.substring(0, x.length - 3);
+      if (otherNumbers !== '')
+      {
+        lastThree = ',' + lastThree;
       }
-      // console.log(csv)
-      return csv.split('').reverse().join('');
+      const res = otherNumbers.replace(/\B(?=(\d{2})+(?!\d))/g, ',') + lastThree;
+      return (res + '/-') ;
     }
+
+  splitCollegeAddress(address) {
+      let full = [];
+
+      const regex = /(.{1,45})(.{1,90})(.{1,90})(.*)/gmis;
+
+      const match = regex.exec(address);
+
+      full.push(match[1]);
+      full.push(match[2]);
+      full.push(match[3]);
+
+      return full;
+  }
+  splitBankAddress(address){
+    let full = [];
+
+    const regex = /(.{1,58})(.{1,90})(.{1,90})(.*)/gmis;
+
+    const match = regex.exec(address);
+
+    full.push(match[1]);
+    full.push(match[2]);
+    full.push(match[3]);
+    
+
+    return full;
+  }
 
   pdf()
   {
@@ -47,50 +61,89 @@ export class AppComponent  {
     const doc = new jsPdf();
 
     doc.setFontSize(12);
-    // doc.setFont("Times New Roman");
-    doc.addImage(img,0,0,210,297);
-
-    let dummy = "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Mauris nisi enim, hendrerit quis urna nec, aliquet lobortis libero. Pellentesque habitant morbi tristique senectus et netus et malesuada fames ac turpis egestas. Nullam diam quam, ultricies in diam et, maximus gravida augue. Nulla pellentesque tristique interdum. Donec vel libero velit. Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed libero nisl, vestibulum id justo eget, facilisis condimentum neque. Ut eget velit vitae velit lobortis facilisis a ullamcorper odio. Fusce ut erat vitae ligula tincidunt tincidunt blandit a tortor. Mauris id porttitor risus. Pellentesque sit amet pulvinar justo, et mollis felis. Pellentesque hendrerit purus ut velit consectetur rhoncus. Integer in vestibulum ligula.";
-
-    let dummyList:string[] = dummy.split(' ');
-
-    console.log(dummyList);
-
-    //line 2,3,5,6,7
-
-    let line1Start = 24*3;
-    //max 27
-    let line1End = 24*7.5-2.75;
-    let x = 24;
+    
+    doc.addImage(img, 0, 0, 210, 297);
+   
+    // const line1Start = 24 * 3;
+    // max 27
+    // const line1End = 24 * 7.5 - 2.75;
+    const x = 24;
     let y = 77;
     
-    //date
-    let date = '14-02-2019';
-    let money1 = '123456789';
-    money1 = this.CommaSeparatedNumbers(money1);
-    let money2 = '999999';
-    money2 = this.CommaSeparatedNumbers(money2);
-    let money3 = '9999';
-    money3 = this.CommaSeparatedNumbers(money3);
-    let bankdd = "999999";
-    let dddate = '12-34-5678';
-
-    doc.fromHTML("Date:- " + date, 24 * 6 - 7 , 56);//16
-
-    doc.fromHTML("Received with thanks from The Principal, ",x,y);//16
-    doc.fromHTML("*54 more characters.................................*", x * 4, y);
-    doc.fromHTML("*54 more characters................................>*", x, y + 5);
-    doc.fromHTML("*54 more characters................................>*", x * 4 + 2, y + 5);
-
-    doc.fromHTML("the sum of Rupees " + money1 + "/- Check/ Bank Draft towards one-time payment of Youth",x,y+10);//16
-    doc.fromHTML("Red Cross College Registration fee " + money2 + " x " + money3 + " 30% student membership Fee",x,y+15);//16
-    doc.fromHTML( bankdd + " Dated. " + dddate + " bank name & full address",x,y+20);//16
-    doc.fromHTML("overflow",x,y+25);//16
+    // let currentDate = null;
+    // let voucher_no = null;
+    // let received_date = null;
     
-    //TOTAL
-    doc.fromHTML("<b>Rs.</b> " + money1, x , y + 67 );
-    doc.fromHTML("Official communications will be followed", x + 100 , y + 62 );
+    // let student_count = null;
+    // let fee = null;
+    // let clg_name = null;
+    // let clg_address = null;
+    
+    //--here--
+    
+    // const sumOfRupees = '';
+    // const bankno = '';
+    // const bankdate = '';
+    // const bnkNamenAddress = bankDetails;
+    // const regFee = fee;
+    // const numStd = student_count;
+    // const total = '';
+    // const clg_name = clgName;
+    // const cur_date = '';
+    
+    let date = '14-02-2019';
+    let clg_address = "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Duis tincidunt urna a nunc dignissim, sit amet lacinia ligula sollicitudin. Quisque a justo et metus vestibulum volutpat id eget nulla. Proin aliquet ac risus quis consectetur. Mauris tempus dui purus, eu scelerisque justo auctor in. Pellentesque rutrum lorem a dolor molestie malesuada eu hendrerit neque. Nullam ac vehicula ex. Nulla facilisi. Cras elit turpis, vehicula iaculis egestas ac, tristique at mauris. Aenean nec malesuada ante.";
+    let sumOfRupees = this.csv('123456789');
+    let regFee = this.csv('999999');
+    let numStd = '9999';
+    
+    let bankno = "999999";
+    let bankdate = '12-34-5678';
+    let no = "1234567890";
+    
+    let report_address = this.splitCollegeAddress(clg_address);
+    
+    let bnkNamenAddress = 'Lorem ipsum dolor sit amet, consectetur adipiscing elit. Duis tincidunt urna a nunc dignissim, sit amet lacinia ligula sollicitudin. Quisque a justo et metus vestibulum volutpat id eget nulla. Proin aliquet ac risus quis consectetur. Mauris tempus dui purus, eu scelerisque justo auctor in. Pellentesque rutrum lorem a dolor molestie malesuada eu hendrerit neque. Nullam ac vehicula ex. Nulla facilisi. Cras elit turpis, vehicula iaculis egestas ac, tristique at mauris. Aenean nec malesuada ante.';
+    let bankAddress = this.splitBankAddress(bnkNamenAddress);
 
+    let total = this.csv('99999999');   
+    
+    doc.fromHTML('No:- ' + no , x , 56);
+    doc.fromHTML('<b>Date</b>:- ' + date, 19 * 8 , 56);
+
+    //line 1
+    doc.fromHTML('Received with thanks from The Principal, ' , x, y);
+    if (report_address[0] !== undefined) {
+      doc.fromHTML(report_address[0], x * 4, y);
+    }
+    //line 2
+    if (report_address[1] !== undefined) {
+      y += 5;
+      doc.fromHTML(report_address[1], x, y);
+    }
+
+    //line 3
+    if (report_address[2] !== undefined) {
+      y += 5;
+      doc.fromHTML(report_address[2], x, y);
+    }
+
+    y += 5;
+    doc.fromHTML('the sum of Rupees ' + sumOfRupees + ' towards one-time payment of Youth Red Cross College' , x, y);
+    y += 5;
+    doc.fromHTML('Registration fee ' + regFee + ' x ' + numStd + ' 30% student membership Fee. Check/ Bank Draft no. ', x, y);
+    y += 5;
+    doc.fromHTML(bankno + ' Dated ' + bankdate, x, y);
+    doc.fromHTML(' ' + bankAddress[0], x * 2.5 + 10, y);
+    y += 5;
+    doc.fromHTML(bankAddress[1], x, y);
+    y += 5;
+    doc.fromHTML(bankAddress[2], x, y);
+    
+    
+    doc.fromHTML('<b>Rs.</b> ' + total, x , 77 + 67 );
+    doc.fromHTML("Official communications will be followed", x + 100 , 77 + 62 - 5 );
+    // doc.save(clg_name + '_' + cur_date + '.pdf');
     doc.save('out.pdf');
   }
 }
